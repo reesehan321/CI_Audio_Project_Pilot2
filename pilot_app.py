@@ -1,9 +1,9 @@
-
 import streamlit as st
 import pandas as pd
 import random
 import re
 import time
+import requests
 from pathlib import Path
 from datetime import datetime
 
@@ -24,6 +24,38 @@ EXPECTED_SONGS = [
 ]
 
 TOTAL_TRIALS = 36
+
+
+# ============================================================
+# GOOGLE SHEETS CONNECTION
+# ============================================================
+
+GOOGLE_SCRIPT_URL = st.secrets.get(
+    "GOOGLE_SCRIPT_URL",
+    ""
+)
+
+
+def save_to_google_sheet(result):
+
+    if not GOOGLE_SCRIPT_URL:
+        return False
+
+    try:
+
+        response = requests.post(
+            GOOGLE_SCRIPT_URL,
+            json=result,
+            timeout=10
+        )
+
+        return response.status_code == 200
+
+    except Exception as e:
+
+        print("Google Sheets error:", e)
+
+        return False
 
 
 # ============================================================
@@ -328,14 +360,28 @@ if response is not None:
         "timestamp": datetime.now().isoformat()
     }
 
+    # --------------------------------------------------------
+    # SAVE RESULT IN SESSION
+    # --------------------------------------------------------
+
     st.session_state.results.append(result)
+
+    # --------------------------------------------------------
+    # SEND RESULT TO GOOGLE SHEETS
+    # --------------------------------------------------------
+
+    save_to_google_sheet(result)
+
+    # --------------------------------------------------------
+    # ADVANCE TRIAL
+    # --------------------------------------------------------
 
     st.session_state.current_trial += 1
 
     st.session_state.trial_start_time = None
 
     # --------------------------------------------------------
-    # FINISH AND SAVE
+    # FINISH AND SAVE LOCAL BACKUP
     # --------------------------------------------------------
 
     if (
