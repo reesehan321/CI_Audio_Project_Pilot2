@@ -1,0 +1,14 @@
+.streamlit/
+.ipynb_checkpoints/
+__pycache__/
+Baseline Audios/
+ILD Test Round/
+Sample Trial/
+*.ipynb
+Pilot/*.wav
+Pilot/*backup*
+Pilot/*.save
+Pilot/requirements.txt
+Pilot/runtime.txt
+Pilot/Results/
+.DS_Store
